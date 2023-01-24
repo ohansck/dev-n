@@ -90,6 +90,10 @@ jobs:
              cd frontend
              npm i
              npm run test
+       - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
                 
   test-backend:
     docker:
@@ -104,6 +108,10 @@ jobs:
              cd backend
              npm i
              npm run test
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
             
   scan-frontend:
     docker:
@@ -120,6 +128,10 @@ jobs:
              npm audit fix --audit-level=critical --force 
              npm audit fix --audit-level=critical --force 
              npm audit --audit-level=critical
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -134,6 +146,10 @@ jobs:
              npm install
              npm audit fix --audit-level=critical -f
              npm audit fix --audit-level=critical -f
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
      
       
 
