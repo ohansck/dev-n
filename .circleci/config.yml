@@ -90,7 +90,7 @@ jobs:
              cd frontend
              npm i
              npm run test
-       - slack/notify:
+      - slack/notify:
           branch_pattern: main
           event: fail
           template: basic_fail_1
