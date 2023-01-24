@@ -130,7 +130,7 @@ jobs:
              npm audit fix --audit-level=critical -f
              exit 1
       - slack/notify:
-          branch_pattern: main
+          # branch_pattern: main
           event: fail
           template: basic_fail_1
       
