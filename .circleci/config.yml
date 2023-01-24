@@ -67,7 +67,8 @@ jobs:
              cd backend
              npm i
              npm run build
-             exit 1
+            #  TEST SLACK ALERT
+            #  BAL BLA ERROR
       - slack/notify:
           branch_pattern: main
           event: fail
