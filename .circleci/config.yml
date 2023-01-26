@@ -268,7 +268,8 @@ jobs:
               curl --insecure https://kvdb.io/GPfzwdnV8HjxcXG9EKBq3n/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
       - destroy_environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
      # Here's where you will add some code to rollback on failure      
 
   # deploy-frontend:
