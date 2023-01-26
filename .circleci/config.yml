@@ -222,7 +222,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            pk add --update --no-cache tar gzip ansible aws-cli
+            apk add --update --no-cache tar gzip ansible aws-cli
       - run:
           name: Configure server
           command: |
