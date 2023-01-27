@@ -337,6 +337,7 @@ jobs:
           command: |
             cd backend
             npm i -f
+            npm update -f
             npm audit fix --force
             npm audit fix -f
             npm run build
