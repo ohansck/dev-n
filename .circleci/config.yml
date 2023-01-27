@@ -328,25 +328,22 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # your code here
-            apk add --update --no-cache tar gzip ansible nodejs npm curl
-      # attach workspace
-      - persist_to_workspace:
-          root: ~/
-      
-      - run:
-          name: Install dependencies
-          working_directory: /tmp
-          command: |
-            apk add --update ansible curl rsync openssh nodejs npm
-            pip install awscli
+            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
+      - attach_workspace:
+          at: ~/
       - run:
           name: Deploy backend
-          working_directory: ./.circleci/ansible
           command: |
-            cat inventory
-            ansible-playbook -i inventory deploy-server.yaml -vv
-      # Here's where you will add some code to rollback on failure 
+            cd backend
+            npm install
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+            cd .circleci/ansible
+            echo "inventory.txt file is ------$(cat inventory.txt)"
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
