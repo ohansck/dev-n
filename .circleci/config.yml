@@ -166,6 +166,7 @@ jobs:
 
   deploy-infrastructure:
     docker:
+      # Docker image here that supports AWS CLI
       - image: amazon/aws-cli
     steps:
       - checkout
@@ -197,9 +198,10 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+      # Here's where you will add some code to rollback on failure    
       - destroy_environment:
-        id: ${CIRCLE_WORKFLOW_ID:0:7}
-        when: on_fail  
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail  
       - slack/notify:
           branch_pattern: main
           event: fail
