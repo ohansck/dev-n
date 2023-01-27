@@ -21,6 +21,7 @@ commands:
           when: << parameters.when >>
       - run:
           name: Destroy udapeople frontend stack and S3 bucket
+          when: on_fail
           command: |
             aws s3 rm s3://udapeople-<<parameters.id>> --recursive
             aws cloudformation delete-stack \
