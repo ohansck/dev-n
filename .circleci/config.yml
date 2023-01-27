@@ -272,7 +272,9 @@ jobs:
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
-    executor: node
+    docker:
+      - image: python:3.7-alpine3.16
+
     steps:
       - checkout
       - attach_workspace:
@@ -301,7 +303,6 @@ jobs:
           root: .
           paths:
             - frontend/dist
-      # Here's where you will add some code to rollback on failure  
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
@@ -312,17 +313,13 @@ jobs:
           template: basic_fail_1    
                     
   deploy-backend:
-    executor: python
+    docker:
+      - image: python:3.7-alpine3.16
     steps:
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
             - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache tar gzip aws-cli ansible nodejs npm
       - attach_workspace:
           at: .
       - run:
