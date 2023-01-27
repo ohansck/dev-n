@@ -278,7 +278,6 @@ jobs:
 
     steps:
       - checkout
-      # Checkout code from git
       - restore_cache:
           keys: [frontend-build]
       - run:
@@ -320,7 +319,6 @@ jobs:
     docker:
       - image: python:3.7-alpine3.16
     steps:
-      # Checkout code from git
       - checkout
       - restore_cache:
           keys: [backend-build]
