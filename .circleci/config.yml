@@ -12,14 +12,14 @@ commands:
     steps:
       - run:
           when: on_fail
-          name: Destroy udapeople backend stack
+          name: Destroy backend stack
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.id >>
           environment:
             TERM: xterm-256color
       - run:
           when: on_fail
-          name: Destroy udapeople frontend stack and S3 bucket
+          name: Destroy frontend stack  and S3 bucket
           command: |
             aws s3 rm s3://udapeople-<<parameters.id>> --recursive
             aws cloudformation delete-stack \
