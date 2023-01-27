@@ -151,7 +151,7 @@ jobs:
           name: back-end Scan
           command: |
              cd backend
-             npm install
+             npm i -f
              npm audit fix --audit-level=critical -f
              npm audit fix --audit-level=critical -f
       - slack/notify:
@@ -169,7 +169,7 @@ jobs:
       - checkout
       - run: yum install -y tar gzip
       - run:
-          name: Ensure back-end infrastructure exists
+          name: Ensure back-end infrastructure exists or Not
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
@@ -177,7 +177,7 @@ jobs:
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
-          name: Ensure front-end infrastructure exist
+          name: Ensure front-end infrastructure exist or Not
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
@@ -216,7 +216,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache tar gzip ansible aws-cli
+            apk add --update --no-cache tar aws-cli ansible gzip
       - run:
           name: Configure server
           command: |
@@ -241,7 +241,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt install -y tar gzip curl
+            sudo apt i -y tar gzip curl
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip -qq awscliv2.zip
             sudo ./aws/install
@@ -251,7 +251,7 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm i
+            npm i -f
             npm run build
             npm run migrations >> migrations.txt
 
@@ -283,7 +283,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            apk add --update --no-cache tar gzip ansible nodejs npm curl aws-cli
+            apk add --update --no-cache tar gzip nodejs npm curl aws-cli ansible
 
       - run:
           name: Get backend url
