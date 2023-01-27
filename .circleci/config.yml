@@ -7,9 +7,8 @@ commands:
   destroy_environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      when:
-        type: string
-      id:
+      when: on_fail
+      id: 
         type: string
     steps:
       - run:
@@ -199,9 +198,9 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure    
-      - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail  
+      # - destroy_environment:
+      #     id: ${CIRCLE_WORKFLOW_ID:0:7}
+      #     when: on_fail  
       - slack/notify:
           branch_pattern: main
           event: fail
@@ -226,9 +225,9 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
 
-      - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
+      # - destroy_environment:
+      #     id: ${CIRCLE_WORKFLOW_ID:0:7}
+      #     when: on_fail
       - slack/notify:
           branch_pattern: main
           event: fail
