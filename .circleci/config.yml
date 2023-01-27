@@ -279,15 +279,14 @@ jobs:
     steps:
       - checkout
       # Checkout code from git
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
             # your code here
             apk add --update --no-cache tar gzip ansible nodejs npm curl
-           
-
-       - restore_cache:
-          keys: [frontend-build]
+            
       - run:
           name: Get backend url
           command: |
