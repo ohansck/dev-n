@@ -266,7 +266,7 @@ jobs:
             fi
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
+          # when: on_fail
       - slack/notify:
           branch_pattern: main
           event: fail
