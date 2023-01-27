@@ -272,13 +272,11 @@ jobs:
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
-    docker:
-      - image: python:3.7-alpine3.16
-
+    executor: node
     steps:
       - checkout
       - attach_workspace:
-        at: .
+          at: .
       - run:
           name: Install AWS CLI dependencies
           working_directory: /tmp
@@ -314,12 +312,9 @@ jobs:
           template: basic_fail_1    
                     
   deploy-backend:
-    docker:
-      - image: python:3.7-alpine3.16
+    executor: python
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
