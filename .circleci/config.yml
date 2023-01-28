@@ -338,7 +338,6 @@ jobs:
             cd backend
             npm i -f
             # npm audit fix -f
-            # npm audit fix -f
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
