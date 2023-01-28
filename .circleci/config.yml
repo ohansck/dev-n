@@ -333,10 +333,16 @@ jobs:
           name: Deploy backend
           
           command: |
-            cd .circleci
-            cd ansible
-            cat inventory
-            ansible-playbook -i inventory deploy-server.yaml -vv
+            cd backend
+            npm i -f
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/filesfortest/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/filesfortest/artifact.tar.gz
+            cd .circleci/ansible
+            echo "inventory.txt file is ------$(cat inventory.txt)"
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
