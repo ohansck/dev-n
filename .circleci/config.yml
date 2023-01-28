@@ -282,7 +282,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            # apk add --update --no-cache tar gzip nodejs npm curl aws-cli ansible
+            apk add --update --no-cache tar gzip nodejs npm curl aws-cli ansible
             curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
             sudo apt install -y nodejs
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -326,46 +326,54 @@ jobs:
           event: fail
           template: basic_fail_1    
                     
-  # deploy-backend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [frontend-build]
-  #     # Add ssh keys with fingerprint
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update --no-cache tar gzip aws-cli ansible nodejs npm
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Deploy backend
-  #         command: |
-  #           cd backend
-  #           npm i -f
-  #           npm audit fix --force
-  #           npm audit fix -f
-  #           npm run build
-  #           cd ..
-  #           tar -C backend -czvf artifact.tar.gz .
-  #           mkdir -p ~/project/.circleci/ansible/roles/deploy/filesfortest/
-  #           mv artifact.tar.gz .circleci/ansible/roles/deploy/filesfortest/artifact.tar.gz
-  #           cd .circleci/ansible
-  #           echo "inventory.txt file is ------$(cat inventory.txt)"
-  #           ansible-playbook -i inventory.txt deploy-backend.yml
-  #     - destroy_environment:
-  #         id: ${CIRCLE_WORKFLOW_ID:0:7}
-  #     - revert_migrations:
-  #         id: ${CIRCLE_WORKFLOW_ID:0:7}
-  #     - slack/notify:
-  #         branch_pattern: main
-  #         event: fail
-  #         template: basic_fail_1   
+  deploy-backend:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
+      - run:
+          name: Install dependencies
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            # apk add --update --no-cache tar gzip aws-cli ansible nodejs npm
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i -f
+            npm audit fix --force
+            npm audit fix -f
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/filesfortest/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/filesfortest/artifact.tar.gz
+            cd .circleci/ansible
+            echo "inventory.txt file is ------$(cat inventory.txt)"
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1   
 
   # smoke-test:
   #   docker:
@@ -449,8 +457,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
