@@ -252,8 +252,6 @@ jobs:
           command: |
             cd backend
             npm i -f
-            # npm audit fix -f
-            # npm audit fix -f
             npm run build
             npm run migrations >> migrations.txt
       - run:
