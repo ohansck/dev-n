@@ -282,7 +282,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            apk add --update --no-cache tar gzip nodejs npm curl aws-cli ansible
+            # apk add --update --no-cache tar gzip nodejs npm curl aws-cli ansible
             curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
             sudo apt install -y nodejs
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
