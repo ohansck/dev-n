@@ -419,8 +419,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            yum install -y tar gzip curl
-            sudo apt install -y tar gzip curl
+            sudo apt install -y tar gzip curl curl npm
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip -qq awscliv2.zip
             sudo ./aws/install
@@ -428,7 +427,23 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # your code here
+            export OldWorkflowID=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name InitialStack \
+            --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \
+            --tags project=udapeople
       # Here's where you will add some code to rollback on failure  
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
 
   # cleanup:
   #   docker:
@@ -478,7 +493,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [smoke-test]
+      - cloudfront-update:
+          requires: [smoke-test]
       # - cleanup:
       #     requires: [cloudfront-update]
