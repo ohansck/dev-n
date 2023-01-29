@@ -2,13 +2,15 @@ version: 2.1
 #  add slack for alert 
 orbs:
   slack: circleci/slack@4.1
-
+parameters:
+  id:
+    type: string
 commands:
   destroy_environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      id: 
-        type: string
+    # parameters:
+    #   id: 
+    #     type: string
     steps:
       - run:
           when: on_fail
@@ -28,10 +30,10 @@ commands:
 
   revert_migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      # Add parameter here 
-      id: 
-        type: string    
+    # parameters:
+    #   # Add parameter here 
+    #   id: 
+    #     type: string    
     steps:
       - run:
           name: Revert migrations
@@ -437,8 +439,8 @@ jobs:
           name: Get old stack workflow id
           command: |
             # your code here
-            echo <<pipeline.parameters>>
-            export OldWorkflowID=<<pipeline.parameters>>
+            echo <<pipeline.parameters.id>>
+            export OldWorkflowID=<<pipeline.parameters.id>>
             export STACKS=$(aws cloudformation list-stacks \
             --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
