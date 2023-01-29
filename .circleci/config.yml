@@ -171,11 +171,7 @@ jobs:
       - run:
           name: Ensure back-end infrastructure exists or Not
           command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=your-tag \
-              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation deploy --template-file .circleci/files/backend.yml --tags project=your-tag --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure front-end infrastructure exist or Not
           command: |
@@ -187,10 +183,7 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo $(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text) >> ~/project/.circleci/ansible/inventory.txt
+            echo $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text) >> ~/project/.circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
@@ -287,10 +280,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo "API_URL=http://${BACKEND_IP}:3030" >> frontend/.env
@@ -371,10 +361,7 @@ jobs:
           name: Get backend url
           command: |
             # your code here
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text)
       - run:
           name: Backend smoke test.
           command: |
@@ -427,14 +414,9 @@ jobs:
           name: Update cloudfront distribution
           command: |
             # your code here
-            export OldWorkflowID=$(aws cloudformation list-exports \
-            --query "Exports[?Name==\`WorkflowID\`].Value" \
+            export OldWorkflowID=$(aws cloudformation list-exports \ --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text)
-            aws cloudformation deploy \
-            --template-file .circleci/files/cloudfront.yml \
-            --stack-name InitialStack \
-            --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \
-            --tags project=udapeople
+            aws cloudformation deploy \ --template-file .circleci/files/cloudfront.yml \ --stack-name InitialStack \ --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \ --tags project=udapeople
       # Here's where you will add some code to rollback on failure  
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
