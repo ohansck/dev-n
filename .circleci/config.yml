@@ -914,7 +914,8 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           # filters:
           #   branches:
-          #     only: [dev-branch]
+              only: [dev-branch]
+              
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
