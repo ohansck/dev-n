@@ -1,4 +1,4 @@
-# version: 2.1
+version: 2.1
 # #  add slack for alert
 # orbs:
 #   slack: circleci/slack@4.1
@@ -506,7 +506,6 @@
 #           requires: [smoke-test]
 #       - cleanup:
 #           requires: [cloudfront-update]
-version: 2.1
 
 orbs:
   slack: circleci/slack@4.1
