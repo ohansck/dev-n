@@ -1,5 +1,4 @@
 version: 2.1
- add slack for alert
 orbs:
   slack: circleci/slack@4.1
 parameters:
