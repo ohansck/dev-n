@@ -210,8 +210,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip ansible aws-cli
-      - attach_workspace:
-          at: ~/
+       - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend
       - run:
           name: Configure server
           command: |
@@ -229,10 +231,7 @@ jobs:
             cat backend/.env
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend
+     
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       #     when: on_fail
@@ -271,7 +270,7 @@ jobs:
           command: |
             if grep -q "success Nejah" ~/project/backend/migrations.txt
             then
-              curl --insecure https://kvdb.io/9UHSzb1y1u7QAiYqAbgkKs/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+              curl --insecure https://kvdb.io/K9L1nBPUDF9Brz8u2meiyL/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
