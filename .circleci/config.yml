@@ -353,8 +353,6 @@ jobs:
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
       - slack/notify:
           branch_pattern: main
           event: fail
@@ -395,8 +393,6 @@ jobs:
       # Here's where you will add some code to rollback on failure
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
       - slack/notify:
           branch_pattern: main
           event: fail
@@ -425,8 +421,6 @@ jobs:
             aws cloudformation deploy --template-file .circleci/files/cloudfront.yml --stack-name InitialStack --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} --tags project=udapeople
       # Here's where you will add some code to rollback on failure
       - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - slack/notify:
           branch_pattern: main
