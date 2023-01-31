@@ -332,8 +332,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip ansible aws-cli
-      - attach_workspace:
-          at: ~/
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend
       - run:
           name: Configure server
           command: |
@@ -351,10 +353,6 @@ jobs:
             cat backend/.env
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
@@ -455,9 +453,9 @@ jobs:
             echo Stack names: "${STACKS[@]}"
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              # aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              # aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
       - slack/notify:
           branch_pattern: newdev
