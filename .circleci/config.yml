@@ -208,10 +208,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip ansible aws-cli
-       - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend
+      - persist_to_workspace:
+        root: ~/
+        paths:
+          - project/backend
       - run:
           name: Configure server
           command: |
