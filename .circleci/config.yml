@@ -181,10 +181,12 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             echo $(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} --output text) >> ~/project/.circleci/ansible/inventory.txt
+            cat project/.circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+            
       # Here's where you will add some code to rollback on failure
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -203,22 +205,40 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1"
+      -
+      - run:
+          name: Install dependencies
+          command:  |
+            apk add --update --no-cache tar gzip ansible aws-cli
       - attach_workspace:
           at: .
       - run:
-          name: Install dependencies
-          working_directory: ./.circleci/ansible
+          name: Configure server
           command: |
-            apk add --update ansible
-            
+            apk add --update --no-cache tar gzip ansible aws-cli
+      - attach_workspace:
+          at: ~/
       - run:
           name: Configure server
-          working_directory: ./.circleci/ansible
           command: |
-            pwd &&
-            ls -la
-            cat inventory
-            ansible-playbook -i inventory configure-server.yaml
+            # add environment variables to server
+            echo ENVIRONMENT=production > backend/.env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> backend/.env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> backend/.env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> backend/.env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> backend/.env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
+            cat backend/.env
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend
       #     when: on_fail
       - slack/notify:
           branch_pattern: main
