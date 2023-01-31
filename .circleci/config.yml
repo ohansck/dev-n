@@ -1,4 +1,5 @@
 version: 2.1
+#  add slack for alert
 orbs:
   slack: circleci/slack@4.1
 parameters:
@@ -26,7 +27,6 @@ commands:
             aws s3 rm s3://udapeople-<<parameters.id>> --recursive
             aws cloudformation delete-stack \
             --stack-name udapeople-frontend-<<parameters.id>>
-
   revert_migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -43,7 +43,6 @@ commands:
             npm install
             npm run build
             npm run migrations:revert
-
 jobs:
   build-frontend:
     docker:
@@ -203,34 +202,16 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
+            - "aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1"
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache tar gzip ansible aws-cli
-      - attach_workspace:
-          at: ~/
+            apk add --update --no-cache tar aws-cli ansible gzip
       - run:
           name: Configure server
           command: |
-            # add environment variables to server
-            echo ENVIRONMENT=production > backend/.env
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> backend/.env
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> backend/.env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> backend/.env
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> backend/.env
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
-            echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
-            cat backend/.env
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       #     when: on_fail
@@ -269,7 +250,7 @@ jobs:
           command: |
             if grep -q "success Nejah" ~/project/backend/migrations.txt
             then
-              curl --insecure https://kvdb.io/K9L1nBPUDF9Brz8u2meiyL/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+              curl --insecure https://kvdb.io/9UHSzb1y1u7QAiYqAbgkKs_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -327,32 +308,30 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
+            - "aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1"
+      - attach_workspace:
+          at: .
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            apk add --update --no-cache tar gzip ansible aws-cli
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend
+            apk add --update ansible curl rsync openssh nodejs npm
+            pip install awscli
       - run:
-          name: Configure server
+          name: Deploy backend
+
           command: |
-            # add environment variables to server
-            echo ENVIRONMENT=production > backend/.env
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> backend/.env
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> backend/.env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> backend/.env
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> backend/.env
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
-            echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
-            cat backend/.env
+            cd backend
+            npm i -f
+            # npm audit fix -f
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/filesfortest/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/filesfortest/artifact.tar.gz
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+            echo "inventory.txt file is ------$(cat inventory.txt)"
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
@@ -393,7 +372,6 @@ jobs:
             export URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
             echo $URL
             if curl ${URL} | grep "Welcome"; then return 0; else return 1; fi
-
       # Here's where you will add some code to rollback on failure
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -434,7 +412,6 @@ jobs:
           branch_pattern: main
           event: fail
           template: basic_fail_1
-
   cleanup:
     docker:
       - image: amazon/aws-cli
@@ -454,13 +431,17 @@ jobs:
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               # aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               # aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
             fi
       - slack/notify:
-          branch_pattern: newdev
+          branch_pattern: dev
           event: fail
           template: basic_fail_1
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
@@ -477,9 +458,9 @@ workflows:
           requires: [build-frontend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          # filters:
-          #   branches:
-          #     only: [newdev]
+      #     filters:
+      #       branches:
+      #         only: [test-feature-branch]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
@@ -492,6 +473,5 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
-
+      - cleanup:
+          requires: [cloudfront-update]
