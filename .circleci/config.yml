@@ -844,16 +844,11 @@ jobs:
             unzip -qq awscliv2.zip
             sudo ./aws/install
       - run:
-          name: Update cloudfront distribution
+          name: Update cloudfront 
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports \
-            --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text)
-            aws cloudformation deploy \
-            --template-file .circleci/files/cloudfront.yml \
-            --stack-name InitialStack \
-            --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \
-            --tags project=udapeople
+            --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
+            aws cloudformation deploy --template-file .circleci/files/cloudfront.yml --stack-name InitialStack --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} --tags project=udapeople
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
@@ -873,35 +868,10 @@ jobs:
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              echo "----------cleaning up stacks------------"
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
-  # add-prometheus-node-exporter:
-  #   docker:
-  #     - image: python:3.7-alpine3.16
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - 'ab:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update aws-cli tar gzip ansible nodejs npm
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Setup Prometheus Node Exporter
-  #         command: |
-  #           cd .circleci/ansible
-  #           cat inventory.txt
-  #           ansible-playbook -i inventory.txt node-exporter.yml
-  #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-  #     - revert-migrations:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
