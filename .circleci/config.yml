@@ -245,7 +245,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/backend
+            - project/.circleci/ansible/inventory.txt
       #     when: on_fail
       - slack/notify:
           branch_pattern: main
