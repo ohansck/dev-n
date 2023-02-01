@@ -360,8 +360,8 @@ jobs:
             mkdir -p ~/project/.circleci/ansible/roles/deploy/filesfortest/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/filesfortest/artifact.tar.gz
             cd .circleci/ansible
-            echo inventory.txt
             cat inventory.txt 
+            echo inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment:
           id: ${CIRCLE_id:0:7}
