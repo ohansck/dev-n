@@ -172,7 +172,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - 'ab:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
+            - 'aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
       - run:
           name: Install dependencies
           command: |
@@ -228,7 +228,7 @@ jobs:
           command: |
             if grep -q "success" ~/project/backend/migrations.txt
             then
-              curl --insecure https://kvdb.io/9UHSzb1y1u7QAiYqAbgkKs/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+              curl --insecure https://kvdb.io/JheeLynWKC1xnPYLUvkWSR/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -273,7 +273,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - 'ab:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
+            - aa:3a:ce:8a:2a:ca:3b:f1:ca:92:8d:70:d8:ca:c2:d1'
       - run:
           name: Install dependencies
           command: |
