@@ -78,10 +78,6 @@ jobs:
             npm run build
           #  TEST SLACK ALERT
           #  BAL BLA ERROR
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -99,10 +95,6 @@ jobs:
             cd frontend
             npm i
             npm run test
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   test-backend:
     docker:
@@ -117,10 +109,6 @@ jobs:
             cd backend
             npm i
             npm run test
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   scan-frontend:
     docker:
@@ -155,10 +143,6 @@ jobs:
             npm i -f
             npm audit fix --audit-level=critical -f
             npm audit fix --audit-level=critical -f
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   deploy-infrastructure:
     docker:
@@ -191,10 +175,6 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       #     when: on_fail
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   configure-infrastructure:
     docker:
@@ -218,10 +198,6 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       #     when: on_fail
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
   #           exit 1
   #     # Here's where you will add some code to rollback on failure
 
@@ -258,10 +234,7 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           # when: on_fail
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
+
       # Here's where you will add some code to rollback on failure
 
   deploy-frontend:
@@ -299,10 +272,6 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   deploy-backend:
     docker:
@@ -339,10 +308,6 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   smoke-test:
     docker:
@@ -381,10 +346,6 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
 
   cloudfront-update:
     docker:
@@ -412,10 +373,7 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
+
   cleanup:
     docker:
       - image: amazon/aws-cli
@@ -438,10 +396,7 @@ jobs:
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
-      - slack/notify:
-          branch_pattern: dev
-          event: fail
-          template: basic_fail_1
+
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert_migrations:
